@@ -12,6 +12,8 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addWidget(board_, 0, Qt::AlignCenter);
     setLayout(layout);
     offset_ = board_->mapToGlobal(board_->rect().topLeft());
+    QDateTime seed_time = QDateTime::currentDateTime();
+    rannd.seed(seed_time.toTime_t());
     StartGame();
 }
 

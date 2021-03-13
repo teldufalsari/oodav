@@ -13,6 +13,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QDateTime>
 
 const int BOARD_WIDTH = 800;
 const int BOARD_HEIGHT = 600;
