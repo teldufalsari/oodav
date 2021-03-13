@@ -60,6 +60,16 @@ void MainWindow::CheckTomato()
     }
 }
 
+void MainWindow::CheckShit()
+{
+    Segment head = segments.first();
+    for (auto& v : shit_list) {
+        if (v.x == head.x && v.y == head.y) {
+            shit_list.removeOne(v);
+        }
+    }
+}
+
 void MainWindow::CheckCollision()
 {
     Segment head(segments.first());
@@ -160,6 +170,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
     if (state_ == ST_IN_GAME) {
         Move();
         CheckTomato();
+        CheckShit();
         CheckCollision();
     }
     repaint();

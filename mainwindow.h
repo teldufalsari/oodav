@@ -23,6 +23,9 @@ struct Point
     Point();
     Point(int new_x, int new_y);
     ~Point() = default;
+    friend inline bool operator ==(const Point& lhs, const Point& rhs) {
+        return (lhs.x == rhs.x && lhs.y == rhs.y);
+    }
 };
 
 
@@ -76,6 +79,7 @@ private:
     void StartGame();
     void PlaceTomato();
     void CheckTomato();
+    void CheckShit();
     void CheckCollision();
     void Draw();
     void Move();
