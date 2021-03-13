@@ -2,11 +2,16 @@
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QWidget(parent)
 {
-    setStyleSheet("background-color:black");
-    resize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    //setStyleSheet("background-color:black");
+    resize(BOARD_WIDTH, BOARD_HEIGHT);
     LoadImages();
+    board_ = new GameBoard(this);
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->addWidget(board_, 0, Qt::AlignCenter);
+    setLayout(layout);
+    offset_ = board_->mapToGlobal(board_->rect().topLeft());
     StartGame();
 }
 
@@ -63,7 +68,7 @@ void MainWindow::CheckCollision()
             state_ = ST_GAMOVER;
             killTimer(timer_);
         }
-    if (head.y >= WINDOW_HEIGHT || head.y < 0 || head.x < 0 || head.x >= WINDOW_WIDTH) {
+    if (head.y >= BOARD_HEIGHT || head.y < 0 || head.x < 0 || head.x >= BOARD_WIDTH) {
         state_ = ST_GAMOVER;
         killTimer(timer_);
     }
@@ -73,9 +78,9 @@ void MainWindow::Draw()
 {
     QPainter qp(this);
     if (state_ != ST_GAMOVER) {
-        qp.drawImage(tomato_location.x, tomato_location.y, tomato);
+        qp.drawImage(offset_.x() + tomato_location.x, offset_.y() + tomato_location.y, tomato);
         for (auto& v : shit_list) {
-            qp.drawImage(v.x, v.y, shit);
+            qp.drawImage(offset_.x() + v.x, offset_.y() + v.y, shit);
         }
         for (auto& v : segments) {
             DrawSegment(qp, v);
@@ -135,13 +140,13 @@ void MainWindow::DrawSegment(QPainter &qp, const Segment &seg)
 {
     switch(seg.type) {
     case Segment::body:
-        qp.drawImage(seg.x, seg.y, segment);
+        qp.drawImage(offset_.x() +  seg.x, offset_.y() +  seg.y, segment);
         break;
     case Segment::head:
-        qp.drawImage(seg.x, seg.y, head);
+        qp.drawImage(offset_.x() +  seg.x, offset_.y() +  seg.y, head);
         break;
     case Segment::fat:
-        qp.drawImage(seg.x - 1, seg.y - 1, fat);
+        qp.drawImage(offset_.x() +  seg.x - 1, offset_.y() +  seg.y - 1, fat);
         break;
     default:
         ;
@@ -211,6 +216,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+    offset_ = board_->mapTo(this, board_->rect().topLeft());
+}
+
 Point::Point() :
     x(0), y(0)
 {
@@ -230,4 +241,13 @@ Segment::Segment(int new_x, int new_y, int new_type) :
     Point(new_x, new_y),
     type(new_type)
 {
+}
+
+GameBoard::GameBoard(QWidget *parent) : QFrame(parent)
+{
+    setFixedSize(BOARD_WIDTH, BOARD_HEIGHT);
+    setLineWidth(2);
+    setMidLineWidth(2);
+    setFrameShape(QFrame::Box);
+    setFrameShadow(QFrame::Raised);
 }

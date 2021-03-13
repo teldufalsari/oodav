@@ -9,9 +9,13 @@
 #include <QKeyEvent>
 #include <QRandomGenerator>
 #include <QTimerEvent>
+#include <QFrame>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
 
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+const int BOARD_WIDTH = 800;
+const int BOARD_HEIGHT = 600;
 
 struct Point
 {
@@ -20,6 +24,16 @@ struct Point
     Point(int new_x, int new_y);
     ~Point() = default;
 };
+
+
+
+class GameBoard : public QFrame
+{
+    Q_OBJECT
+public:
+    GameBoard(QWidget* parent = nullptr);
+};
+
 
 struct Segment : public Point
 {
@@ -30,10 +44,11 @@ struct Segment : public Point
     ~Segment() = default;
 };
 
-class MainWindow : public QMainWindow
+class MainWindow : public QWidget
 {
     Q_OBJECT
 private:
+    GameBoard* board_;
     const int DOT_SIZE = 10;
     int period = 100;
     QList<Segment> segments;
@@ -47,6 +62,7 @@ private:
     QImage shit;
     int timer_;
     int state_;
+    QPoint offset_;
     enum states {ST_IN_GAME = 1, ST_PAUSED, ST_GAMOVER};
     int direction_;
     enum directions {D_UP = 1, D_DOWN, D_LEFT, D_RIGHT};
@@ -70,5 +86,6 @@ protected:
     void timerEvent(QTimerEvent* event);
     void paintEvent(QPaintEvent* event);
     void keyPressEvent(QKeyEvent* event);
+    void resizeEvent(QResizeEvent* event);
 };
 #endif // MAINWINDOW_H
