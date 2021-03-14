@@ -8,9 +8,49 @@ MainWindow::MainWindow(QWidget *parent)
     resize(BOARD_WIDTH, BOARD_HEIGHT);
     LoadImages();
     board_ = new GameBoard(this);
-    QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->addWidget(board_, 0, Qt::AlignCenter);
-    setLayout(layout);
+    score_counter_ = new QLCDNumber(this);
+    score_counter_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    shit_eaten_counter_ = new QLCDNumber(this);
+    shit_eaten_counter_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    speed_counter_ = new QLCDNumber(this);
+    speed_counter_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    //speed_knob_ = new QDial(this);
+    toxic_bar_ = new QProgressBar;
+    toxic_bar_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    toxic_bar_->setMinimum(0);
+    toxic_bar_->setMaximum(MAX_TOXICITY);
+
+    QLabel* score_label = new QLabel("SCORE", this);
+    QLabel* shit_label = new QLabel("SHIT", this);
+    QLabel* toxic_label = new QLabel("TOXICITY", this);
+    QLabel* speed_label = new QLabel("SPEED", this);
+
+    QVBoxLayout* score_box = new QVBoxLayout;
+    score_box->addWidget(score_label, 0, Qt::AlignHCenter);
+    score_box->addWidget(score_counter_);
+
+    QVBoxLayout* shit_box = new QVBoxLayout;
+    shit_box->addWidget(shit_label, 0, Qt::AlignHCenter);
+    shit_box->addWidget(shit_eaten_counter_);
+
+    QVBoxLayout* toxic_box = new QVBoxLayout;
+    toxic_box->addWidget(toxic_label, 0, Qt::AlignHCenter);
+    toxic_box->addWidget(toxic_bar_);
+
+    QVBoxLayout* speed_box = new QVBoxLayout;
+    speed_box->addWidget(speed_label, 0, Qt::AlignHCenter);
+    speed_box->addWidget(speed_counter_);
+
+    QVBoxLayout* vbox = new QVBoxLayout(this);
+    vbox->addWidget(board_, 0, Qt::AlignCenter);
+    QHBoxLayout* hbox = new QHBoxLayout;
+    hbox->addLayout(score_box);
+    hbox->addLayout(shit_box);
+    hbox->addLayout(toxic_box);
+    hbox->addLayout(speed_box);
+    //hbox->addWidget(speed_knob_);
+    vbox->addLayout(hbox, Qt::AlignBottom);
+    setLayout(vbox);
     offset_ = board_->mapToGlobal(board_->rect().topLeft());
     QDateTime seed_time = QDateTime::currentDateTime();
     rannd.seed(seed_time.toTime_t());
@@ -32,6 +72,11 @@ void MainWindow::LoadImages()
 
 void MainWindow::StartGame()
 {
+    score_ = 0;
+    toxicity_ = 0;
+    toxic_bar_->setValue(toxicity_);
+    score_counter_->display(score_);
+    shit_eaten_counter_->display(shit_list.count());
     segments.clear();
     shit_list.clear();
     direction_ = D_LEFT;
@@ -55,6 +100,8 @@ void MainWindow::CheckTomato()
     if (head.x == tomato_location.x && head.y == tomato_location.y) {
         PlaceTomato();
         segments[1].type = Segment::fat;
+        score_++;
+        score_counter_->display(score_);
     } else {
         if (segments.last().type == Segment::fat)
             shit_list.push_back(segments.last());
@@ -68,6 +115,12 @@ void MainWindow::CheckShit()
     for (auto& v : shit_list) {
         if (v.x == head.x && v.y == head.y) {
             shit_list.removeOne(v);
+            shit_eaten_counter_->display(shit_list.count());
+            toxicity_ += 10000;
+            if (toxicity_ >= MAX_TOXICITY) {
+                state_ = ST_GAMOVER;
+                killTimer(timer_);
+            }
         }
     }
 }
@@ -174,6 +227,9 @@ void MainWindow::timerEvent(QTimerEvent *event)
         CheckTomato();
         CheckShit();
         CheckCollision();
+        if (toxicity_ >= 0)
+            toxicity_ -= 1;
+        toxic_bar_->setValue(toxicity_);
     }
     repaint();
 }

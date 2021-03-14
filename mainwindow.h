@@ -14,9 +14,15 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QDateTime>
+#include <QLabel>
+#include <QLCDNumber>
+#include <QSizePolicy>
+#include <QProgressBar>
+#include <QDial>
 
 const int BOARD_WIDTH = 800;
 const int BOARD_HEIGHT = 600;
+const int MAX_TOXICITY = 30000;
 
 struct Point
 {
@@ -53,6 +59,11 @@ class MainWindow : public QWidget
     Q_OBJECT
 private:
     GameBoard* board_;
+    QLCDNumber* shit_eaten_counter_;
+    QLCDNumber* score_counter_;
+    QLCDNumber* speed_counter_;
+    //QDial* speed_knob_;
+    QProgressBar* toxic_bar_;
     const int DOT_SIZE = 10;
     int period = 100;
     QList<Segment> segments;
@@ -66,6 +77,8 @@ private:
     QImage shit;
     int timer_;
     int state_;
+    int score_;
+    int toxicity_;
     QPoint offset_;
     enum states {ST_IN_GAME = 1, ST_PAUSED, ST_GAMOVER};
     int direction_;
