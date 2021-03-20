@@ -76,7 +76,8 @@ void MainWindow::StartGame()
     toxicity_ = 0;
     toxic_bar_->setValue(toxicity_);
     score_counter_->display(score_);
-    shit_eaten_counter_->display(shit_list.count());
+    shit_eaten_counter_->display(0);
+    speed_counter_->display(1000 / period_);
     segments.clear();
     shit_list.clear();
     direction_ = D_LEFT;
@@ -85,7 +86,7 @@ void MainWindow::StartGame()
     segments.push_back(Segment(370, 300, Segment::body));
     PlaceTomato();
     state_ = ST_IN_GAME;
-    timer_ = startTimer(period);
+    timer_ = startTimer(period_);
 }
 
 void MainWindow::PlaceTomato()
@@ -115,7 +116,7 @@ void MainWindow::CheckShit()
     for (auto& v : shit_list) {
         if (v.x == head.x && v.y == head.y) {
             shit_list.removeOne(v);
-            shit_eaten_counter_->display(shit_list.count());
+            shit_eaten_counter_ += 1;
             toxicity_ += 10000;
             if (toxicity_ >= MAX_TOXICITY) {
                 state_ = ST_GAMOVER;
@@ -228,7 +229,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
         CheckShit();
         CheckCollision();
         if (toxicity_ >= 0)
-            toxicity_ -= 1;
+            toxicity_ -= 8;
         toxic_bar_->setValue(toxicity_);
     }
     repaint();
@@ -270,7 +271,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             state_ = ST_PAUSED;
             break;
         case ST_PAUSED:
-            timer_ = startTimer(period);
+            timer_ = startTimer(period_);
             state_ = ST_IN_GAME;
             break;
         case ST_GAMOVER:

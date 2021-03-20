@@ -65,7 +65,7 @@ private:
     //QDial* speed_knob_;
     QProgressBar* toxic_bar_;
     const int DOT_SIZE = 10;
-    int period = 100;
+    int period_ = 100;
     QList<Segment> segments;
     QList<Point> shit_list;
     Point tomato_location;
